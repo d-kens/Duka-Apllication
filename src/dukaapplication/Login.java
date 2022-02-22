@@ -10,13 +10,32 @@ package dukaapplication;
  */
 
 
-import java.sql.ResultSet;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.JFrame;
+
+import java.text.DateFormat;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.Vector;
 
 
 
 
 public class Login extends javax.swing.JFrame {
+    
+    private static final String username = "root";
+    private static final String password1 = "";
+    private static final String dataConn = "jdbc:mysql://localhost:3306/dukaapplication";
 
     /**
      * Creates new form Login
@@ -24,6 +43,15 @@ public class Login extends javax.swing.JFrame {
     public Login() {
         initComponents();
     }
+    
+    
+    Connection conn;
+    PreparedStatement pst;
+    ResultSet rs;
+    
+    
+    
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -46,6 +74,7 @@ public class Login extends javax.swing.JFrame {
         jButton3 = new javax.swing.JButton();
         jLabel5 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -98,6 +127,11 @@ public class Login extends javax.swing.JFrame {
         jButton3.setForeground(new java.awt.Color(102, 102, 0));
         jButton3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/dukaapplication/close.png"))); // NOI18N
         jButton3.setText("CLEAR");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
 
         jLabel5.setFont(new java.awt.Font("Segoe UI", 2, 14)); // NOI18N
         jLabel5.setForeground(new java.awt.Color(102, 102, 0));
@@ -157,6 +191,20 @@ public class Login extends javax.swing.JFrame {
         jButton1.setForeground(new java.awt.Color(102, 102, 0));
         jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/dukaapplication/left-arrow.png"))); // NOI18N
         jButton1.setText("BACK");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        jButton4.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jButton4.setForeground(new java.awt.Color(102, 102, 0));
+        jButton4.setText("CREATE ACCOUNT");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -166,7 +214,10 @@ public class Login extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(83, 83, 83)
+                        .addGap(53, 53, 53)
+                        .addComponent(jButton4))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(91, 91, 91)
                         .addComponent(jButton1)))
                 .addGap(18, 18, 18)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -179,7 +230,9 @@ public class Login extends javax.swing.JFrame {
                 .addGap(0, 0, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(35, 35, 35)
+                .addGap(18, 18, 18)
+                .addComponent(jButton4)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton1)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -193,12 +246,69 @@ public class Login extends javax.swing.JFrame {
     }//GEN-LAST:event_jTextField1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
+        
+        String uname = jTextField1.getText();
+        String pass = jPasswordField1.getText();
+        
+        try {
+            // TODO add your handling code here:
+            Class.forName("com.mysql.jdbc.Driver");
+            conn = DriverManager.getConnection(dataConn,username,password1);
+            
+            String query = "SELECT username,password FROM new_account WHERE username = '"+uname+"' AND password = '"+pass+"'";
+            pst = conn.prepareStatement(query);
+            rs = pst.executeQuery();
+            
+            if(rs.next()){
+                Admin admin = new Admin();
+                admin.setVisible(true);
+                dispose();
+            }else{
+                //Username and password is wrong
+                JOptionPane.showMessageDialog(this, "Usernaem or password wrong...");
+                jTextField1.setText("");
+                jPasswordField1.setText("");
+            }
+            
+            conn.close();
+            
+            
+            
+        } catch (ClassNotFoundException | SQLException ex) {
+            Logger.getLogger(Login.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
+        
         
        
         
 
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        // TODO add your handling code here:
+        
+        CreateAccount acc = new CreateAccount();
+        acc.setVisible(true);
+        dispose();
+        
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+        jTextField1.setText("");
+        jPasswordField1.setText("");
+         jTextField1.requestFocus();
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        
+        HomePage home = new HomePage();
+        home.setVisible(true);
+        dispose();
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -239,6 +349,7 @@ public class Login extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

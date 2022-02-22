@@ -7,10 +7,21 @@ package dukaapplication;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.swing.JFrame;
+
+import java.text.DateFormat;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.Vector;
+
 
 
 /**
@@ -19,8 +30,9 @@ import javax.swing.JOptionPane;
  */
 public class CreateAccount extends javax.swing.JFrame {
     
-    Connection conn = null;
-    PreparedStatement stmt = null;
+    private static final String username = "root";
+    private static final String password1 = "";
+    private static final String dataConn = "jdbc:mysql://localhost:3306/dukaapplication";
 
     /**
      * Creates new form CreateAccount
@@ -28,6 +40,13 @@ public class CreateAccount extends javax.swing.JFrame {
     public CreateAccount() {
         initComponents();
     }
+    
+    
+    
+    Connection conn;
+    PreparedStatement pst;
+    ResultSet rs;
+    
     
 
     
@@ -155,6 +174,11 @@ public class CreateAccount extends javax.swing.JFrame {
         jButton3.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jButton3.setForeground(new java.awt.Color(102, 102, 0));
         jButton3.setText("CLEAR");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
 
         jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel7.setForeground(new java.awt.Color(102, 102, 0));
@@ -266,6 +290,9 @@ public class CreateAccount extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
+        Login login = new Login();
+        login.setVisible(true);
+        dispose();
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void fnameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fnameActionPerformed
@@ -289,9 +316,48 @@ public class CreateAccount extends javax.swing.JFrame {
     }//GEN-LAST:event_genderActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
+        try {
+            // TODO add your handling code here:
+            Class.forName("com.mysql.jdbc.Driver");
+            conn = DriverManager.getConnection(dataConn,username,password1);
+            pst = conn.prepareStatement("INSERT INTO new_account(firstname,lastname,username,gender,password,phone) VALUES(?,?,?,?,?,?)");
+            
+            
+            pst.setString(1,fname.getText());
+            pst.setString(2,lname.getText());
+            pst.setString(3,uname.getText());
+            pst.setString(4,gender.getSelectedItem().toString());
+            pst.setString(5,password.getText());
+            pst.setString(6,phone.getText());
+            
+            pst.executeUpdate();
+            JOptionPane.showMessageDialog(this,"Account Created Successfully");
+            Login login = new Login();
+            login.setVisible(true);
+            dispose();
+            
+            
+            
+            
+            
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(CreateAccount.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(CreateAccount.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
        
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+        fname.setText("");
+        lname.setText("");
+        uname.setText("");
+        password.setText("");
+        phone.setText("");
+        fname.requestFocus();
+    }//GEN-LAST:event_jButton3ActionPerformed
 
     /**
      * @param args the command line arguments
