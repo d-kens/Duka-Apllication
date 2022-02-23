@@ -7,18 +7,99 @@ package dukaapplication;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+
+
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.JFrame;
+
+import java.text.DateFormat;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.Vector;
+import javax.swing.RowFilter;
+import javax.swing.table.TableRowSorter;
+
 /**
  *
  * @author omond
  */
 public class Users extends javax.swing.JFrame {
+    
+    private static final String username = "root";
+    private static final String password = "";
+    private static final String dataConn = "jdbc:mysql://localhost:3306/dukaapplication";
 
     /**
      * Creates new form Users
      */
     public Users() {
         initComponents();
+        populateTable();
     }
+    
+     Connection conn;
+    PreparedStatement pst;
+    ResultSet rs;
+    
+    int q, i, id, deleteItem;
+    
+    
+    public void populateTable(){
+        
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            conn = DriverManager.getConnection(dataConn,username,password);
+            
+            pst = conn.prepareStatement("SELECT * FROM new_account");
+            
+            rs = pst.executeQuery();
+            ResultSetMetaData stData = rs.getMetaData();
+            
+            q = stData.getColumnCount();
+            
+            
+            DefaultTableModel RecordTable = (DefaultTableModel)jTable1.getModel();
+            RecordTable.setRowCount(0);
+            
+            
+            while(rs.next()){
+                Vector columnData = new Vector();
+                
+                for (i = 1; i <= q; i++){
+                    columnData.add(rs.getString("id"));
+                    columnData.add(rs.getString("firstname"));
+                    columnData.add(rs.getString("lastname"));
+                    columnData.add(rs.getString("username"));
+                    columnData.add(rs.getString("gender"));
+                    columnData.add(rs.getString("password"));
+                    columnData.add(rs.getString("phone"));
+                }
+                RecordTable.addRow(columnData);
+            }
+            
+            
+            
+        } catch (ClassNotFoundException | SQLException ex) {
+            Logger.getLogger(HomePage.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    
+    
+    
+    
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -32,7 +113,6 @@ public class Users extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
-        jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
@@ -47,13 +127,10 @@ public class Users extends javax.swing.JFrame {
 
             },
             new String [] {
-                "UserID", "FirstName", "LastName", "Gender", "Password", "Phone Number"
+                "UserID", "FirstName", "UserName", "LastName", "Gender", "Password", "Phone Number"
             }
         ));
         jScrollPane1.setViewportView(jTable1);
-
-        jButton1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jButton1.setText("EDIT");
 
         jButton2.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jButton2.setText("DELETE");
@@ -79,28 +156,25 @@ public class Users extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 554, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(33, 33, 33)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(24, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 669, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton2, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jButton4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(35, 35, 35))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jButton1)
-                .addGap(18, 18, 18)
+                .addGap(33, 33, 33)
                 .addComponent(jButton2)
-                .addGap(30, 30, 30)
+                .addGap(29, 29, 29)
                 .addComponent(jButton3)
-                .addGap(18, 18, 18)
+                .addGap(32, 32, 32)
                 .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(42, Short.MAX_VALUE))
+                .addContainerGap(60, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -172,7 +246,6 @@ public class Users extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;

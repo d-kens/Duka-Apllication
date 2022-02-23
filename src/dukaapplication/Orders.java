@@ -7,18 +7,94 @@ package dukaapplication;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.JFrame;
+
+import java.text.DateFormat;
+import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.Vector;
+import javax.swing.RowFilter;
+import javax.swing.table.TableRowSorter;
+
 /**
  *
  * @author omond
  */
 public class Orders extends javax.swing.JFrame {
+    
+    private static final String username = "root";
+    private static final String password = "";
+    private static final String dataConn = "jdbc:mysql://localhost:3306/dukaapplication";
 
     /**
      * Creates new form Orders
      */
     public Orders() {
         initComponents();
+        populateTable();
     }
+    
+    Connection conn;
+    PreparedStatement pst;
+    ResultSet rs;
+    
+    int q, i, id, deleteItem;
+    
+    
+    public void populateTable(){
+        
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            conn = DriverManager.getConnection(dataConn,username,password);
+            
+            pst = conn.prepareStatement("SELECT * FROM orders");
+            
+            rs = pst.executeQuery();
+            ResultSetMetaData stData = rs.getMetaData();
+            
+            q = stData.getColumnCount();
+            
+            
+            DefaultTableModel RecordTable = (DefaultTableModel)jTable1.getModel();
+            RecordTable.setRowCount(0);
+            
+            
+            while(rs.next()){
+                Vector columnData = new Vector();
+                
+                for (i = 1; i <= q; i++){
+                    columnData.add(rs.getString("order_id"));
+                    columnData.add(rs.getString("item_name"));
+                    columnData.add(rs.getString("quantity"));
+                    columnData.add(rs.getString("price"));
+                    columnData.add(rs.getString("total"));
+                }
+                RecordTable.addRow(columnData);
+            }
+            
+            
+            
+        } catch (ClassNotFoundException | SQLException ex) {
+            Logger.getLogger(HomePage.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    
+    
+    
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -32,7 +108,6 @@ public class Orders extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
-        jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
@@ -52,9 +127,6 @@ public class Orders extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(jTable1);
 
-        jButton1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        jButton1.setText("EDIT");
-
         jButton2.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jButton2.setText("BACK");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
@@ -65,6 +137,11 @@ public class Orders extends javax.swing.JFrame {
 
         jButton3.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jButton3.setText("DELETE");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
 
         jButton4.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jButton4.setText("EXIT");
@@ -82,9 +159,7 @@ public class Orders extends javax.swing.JFrame {
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 464, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(35, 35, 35)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jButton3)
                     .addComponent(jButton2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(26, Short.MAX_VALUE))
@@ -94,11 +169,9 @@ public class Orders extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButton3)
-                .addGap(18, 18, 18)
-                .addComponent(jButton1)
-                .addGap(18, 18, 18)
+                .addGap(42, 42, 42)
                 .addComponent(jButton2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(40, 40, 40)
                 .addComponent(jButton4)
                 .addGap(248, 248, 248))
             .addGroup(jPanel1Layout.createSequentialGroup()
@@ -143,6 +216,37 @@ public class Orders extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jButton4ActionPerformed
 
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+        DefaultTableModel RecordTable = (DefaultTableModel)jTable1.getModel();
+        int SelectedRows = jTable1.getSelectedRow();
+        
+        
+        try{
+            id = Integer.parseInt(RecordTable.getValueAt(SelectedRows, 0).toString());
+            
+            deleteItem = JOptionPane.showConfirmDialog(null,"Confirm if you want to delete item","warning",JOptionPane.YES_NO_OPTION);
+            if(deleteItem == JOptionPane.YES_OPTION){
+                Class.forName("com.mysql.jdbc.Driver");
+                conn = DriverManager.getConnection(dataConn,username,password);
+                pst = conn.prepareStatement("DELETE FROM orders WHERE order_id = ?");
+                
+                pst.setInt(1, id);
+                pst.executeUpdate();
+                
+                
+                JOptionPane.showMessageDialog(this, "Delete Successful"+id);
+                populateTable();
+            }
+        } catch (ClassNotFoundException | SQLException ex) {
+            Logger.getLogger(Admin.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
+        
+        
+    }//GEN-LAST:event_jButton3ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -179,7 +283,6 @@ public class Orders extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
